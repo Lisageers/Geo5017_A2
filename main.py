@@ -157,6 +157,23 @@ def feature_visualization(X):
     ax.legend()
     plt.show()
 
+def training_set(X, Y, t):
+    """
+    Conduct SVM classification
+        X: features
+        Y: labels
+        t: percetage of features that is the training set
+    """
+    size_t = round(len(X) * (t/100))
+    size_e = round(len(X) - size_t)
+
+    Xt = X[:size_t]
+    Yt = Y[:size_t]
+    Xe = X[:size_e]
+    Ye = Y[:size_e]
+
+    return Xt, Yt, Xe, Ye
+
 
 def SVM_classification(X, Y):
     """
@@ -241,12 +258,17 @@ if __name__=='__main__':
     # X=features & Y=labels
 
     # visualize features
-    print('Visualize the features')
-    feature_visualization(X=X)
+    # print('Visualize the features')
+    # feature_visualization(X=X)
 
     # SVM classification
-    print('Start SVM classification')
-    SVM_classification(X, Y)
+    print('Get training set')
+    Xt, Yt, Xe, Ye = training_set(X, Y, 60)
+    # Xt&Yt are training, Xe&Ye are evaluating/test set
+    
+    # SVM classification
+    # print('Start SVM classification')
+    # SVM_classification(X, Y)
 
     # RF classification
     print('Start RF classification')
