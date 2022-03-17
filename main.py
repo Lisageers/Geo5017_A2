@@ -3,6 +3,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.neighbors import KDTree
 from sklearn import svm
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import make_classification
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import train_test_split
 import glob
 from tqdm import tqdm
 from os.path import exists, join
@@ -162,15 +167,9 @@ def training_set(X, Y, t):
     Conduct SVM classification
         X: features
         Y: labels
-        t: percetage of features that is the training set
+        t: train size, between 0 and 1
     """
-    size_t = round(len(X) * (t/100))
-    size_e = round(len(X) - size_t)
-
-    Xt = X[:size_t]
-    Yt = Y[:size_t]
-    Xe = X[:size_e]
-    Ye = Y[:size_e]
+    Xt, Xe, Yt, Ye = train_test_split(X, Y, train_size=t)
 
     return Xt, Yt, Xe, Ye
 
@@ -235,24 +234,36 @@ def SVM_classification(Xt, Yt, Xe):
     predicted_labels = clf.predict(Xe)
     return predicted_labels
 
-def RF_classification(X, Y):
+def RF_classification(Xt, Yt, Xe):
     """
     Conduct RF classification
-        X: features
-        Y: labels
+        Xt: features training set
+        Yt: labels training set
+        Xe: features evaluation/test set
     """
-    print("TODO: implement RF")
-    pass
+    clf = RandomForestClassifier(n_estimators=100, criterion="gini", max_features="auto") # we should do tests with these parameters
+    clf.fit(Xt, Yt)
+    predicted_labels = clf.predict(Xe)
+    return predicted_labels
 
 
-def Evaluation(Y_preds=None, Y_true=None):
+def Evaluation(Y_pred=None, Y_true=None):
     """
     Evaluate the performance
         Y_preds: predicted labels
         Y_true: true labels
     """
-    print("TODO: implement evaluation")
-    pass
+    print("Overall accuracy:")
+    print(accuracy_score(Y_true, Y_pred)) # 0 to 1
+
+    print("mean per-class accuracy")
+    cmatrix = confusion_matrix(Y_true, Y_pred)
+    # check if correct, doesnt work well when nr of pred classes is higher than nr of true classes:
+    print(cmatrix.diagonal()/cmatrix.sum(axis=1))
+
+    print("Confusion matrix:")
+    print(cmatrix)
+
 
 
 if __name__=='__main__':
@@ -275,19 +286,19 @@ if __name__=='__main__':
 
     # SVM classification
     print('Get training set')
-    Xt, Yt, Xe, Ye = training_set(X, Y, 60)
+    Xt, Yt, Xe, Ye = training_set(X, Y, 0.6) # beware this is random
     # Xt&Yt are training, Xe&Ye are evaluating/test set
     
     # SVM classification
     print('Start SVM classification')
-    SVM_kernel_test(X, Y)
+    # SVM_kernel_test(X, Y)
     Y_svm_pred = SVM_classification(Xt, Yt, Xe)
 
     # RF classification
     print('Start RF classification')
-    RF_classification(X, Y)
+    Y_rf_pred = RF_classification(Xt, Yt, Xe)
 
     # Evaluate results
     print('Start evaluating the result')
     Evaluation(Y_svm_pred, Ye)
-
+    Evaluation(Y_rf_pred, Ye)
