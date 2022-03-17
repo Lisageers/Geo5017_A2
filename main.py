@@ -2,6 +2,7 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.neighbors import KDTree
+from sklearn import svm
 import glob
 from tqdm import tqdm
 from os.path import exists, join
@@ -163,8 +164,46 @@ def SVM_classification(X, Y):
         X: features
         Y: labels
     """
-    print("TODO: implement SVM")
-    pass
+    C = 1.0  # SVM regularization parameter
+    models = (
+        svm.SVC(kernel="linear", C=C),
+        svm.SVC(kernel="sigmoid", C=C, gamma="auto"),
+        svm.SVC(kernel="rbf", gamma=0.7, C=C),
+        svm.SVC(kernel="poly", degree=3, gamma="auto", C=C),
+    )
+    models = (clf.fit(X, Y) for clf in models)
+
+    # title for the plots
+    titles = (
+        "SVC with linear kernel",
+        "SVS with sigmoid kernel",
+        "SVC with RBF kernel",
+        "SVC with polynomial (degree 3) kernel",
+    )
+
+    # Set-up 2x2 grid for plotting.
+    fig, sub = plt.subplots(2, 2)
+    plt.subplots_adjust(wspace=0.4, hspace=0.4)
+
+    X0, X1 = X[:, 0], X[:, 1]
+    x_min, x_max = X0.min() - 1, X0.max() + 1
+    y_min, y_max = X1.min() - 1, X1.max() + 1
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.02), np.arange(y_min, y_max, 0.02))
+
+    for clf, title, ax in zip(models, titles, sub.flatten()):
+        Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
+        Z = Z.reshape(xx.shape)
+        ax.contourf(xx, yy, Z)
+        ax.scatter(X0, X1, c=Y, cmap=plt.cm.coolwarm, s=20, edgecolors="k")
+        ax.set_xlim(xx.min(), xx.max())
+        ax.set_ylim(yy.min(), yy.max())
+        ax.set_xlabel("Height")
+        ax.set_ylabel("Root density")
+        ax.set_xticks(())
+        ax.set_yticks(())
+        ax.set_title(title)
+
+    plt.show()
 
 
 def RF_classification(X, Y):
@@ -199,6 +238,7 @@ if __name__=='__main__':
     # load the data
     print('Start loading data from the local file')
     ID, X, Y = data_loading()
+    # X=features & Y=labels
 
     # visualize features
     print('Visualize the features')
