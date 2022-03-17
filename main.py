@@ -175,9 +175,9 @@ def training_set(X, Y, t):
     return Xt, Yt, Xe, Ye
 
 
-def SVM_classification(X, Y):
+def SVM_kernel_test(X, Y):
     """
-    Conduct SVM classification
+    Conduct SVM kernel testing
         X: features
         Y: labels
     """
@@ -202,7 +202,7 @@ def SVM_classification(X, Y):
     fig, sub = plt.subplots(2, 2)
     plt.subplots_adjust(wspace=0.4, hspace=0.4)
 
-    X0, X1 = X[:, 0], X[:, 1]
+    X0, X1 = X[:, 0], X[:, 1]  # decide which features we want to use to test the kernel methods
     x_min, x_max = X0.min() - 1, X0.max() + 1
     y_min, y_max = X1.min() - 1, X1.max() + 1
     xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.02), np.arange(y_min, y_max, 0.02))
@@ -214,14 +214,26 @@ def SVM_classification(X, Y):
         ax.scatter(X0, X1, c=Y, cmap=plt.cm.coolwarm, s=20, edgecolors="k")
         ax.set_xlim(xx.min(), xx.max())
         ax.set_ylim(yy.min(), yy.max())
-        ax.set_xlabel("Height")
-        ax.set_ylabel("Root density")
+        ax.set_xlabel("Height")  # change this after feature selection!!
+        ax.set_ylabel("Root density")  # change this after feature selection!!
         ax.set_xticks(())
         ax.set_yticks(())
         ax.set_title(title)
 
     plt.show()
 
+def SVM_classification(Xt, Yt, Xe):
+    """
+    Conduct SVM classification
+        Xt: features training set
+        Yt: labels training set
+        Xe: features evaluation/test set
+    """
+    C = 1.0  # SVM regularization parameter
+    clf = svm.SVC(kernel="linear", C=C) # need to change the kernel after tests!!
+    clf.fit(Xt, Yt)
+    predicted_labels = clf.predict(Xe)
+    return predicted_labels
 
 def RF_classification(X, Y):
     """
@@ -267,8 +279,9 @@ if __name__=='__main__':
     # Xt&Yt are training, Xe&Ye are evaluating/test set
     
     # SVM classification
-    # print('Start SVM classification')
-    # SVM_classification(X, Y)
+    print('Start SVM classification')
+    SVM_kernel_test(X, Y)
+    Y_svm_pred = SVM_classification(Xt, Yt, Xe)
 
     # RF classification
     print('Start RF classification')
@@ -276,5 +289,5 @@ if __name__=='__main__':
 
     # Evaluate results
     print('Start evaluating the result')
-    Evaluation()
+    Evaluation(Y_svm_pred, Ye)
 
