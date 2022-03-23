@@ -96,7 +96,7 @@ class urban_object:
         # eigenentropy
         E_l = 0.0
         for i in range(3):
-            E_l = E_l + np.log(w[i])
+            E_l = E_l + w[i]*np.log(w[i])
         E_l = -E_l
         self.feature.append(E_l)
         # sum
@@ -124,8 +124,8 @@ class urban_object:
                 z_max = point[2]
 
         # x-range, y-range, z-range
-        self.feature.append(abs(x_max-x_min))
-        self.feature.append(abs(y_max-y_min))
+        # self.feature.append(abs(x_max-x_min))
+        # self.feature.append(abs(y_max-y_min))
 
 
 def read_xyz(filenm):
@@ -149,7 +149,7 @@ def feature_preparation(data_path):
         data_path: the path to read data
     """
     # check if the current data file exist
-    data_file = 'data_3.txt'
+    data_file = 'data_2.txt'
     if exists(data_file):
         return
 
@@ -187,11 +187,11 @@ def feature_preparation(data_path):
     outputs = np.array(input_data).astype(np.float32)
 
     # write the output to a local file
-    data_header = 'ID,label,root_density,linearity,planarity,sphericity,omnivariance,anisotropy,x-range,y-range'
+    data_header = 'ID,label,root_density,linearity,planarity,sphericity,omnivariance,anisotropy'
     np.savetxt(data_file, outputs, fmt='%10.5f', delimiter=',', newline='\n', header=data_header)
 
 
-def data_loading(data_file='data_3.txt'):
+def data_loading(data_file='data_2.txt'):
     """
     Read the data with features from the data file
         data_file: the local file to read data with features and labels
@@ -245,7 +245,7 @@ def feature_vis_multiple(X):
     labels = ['building', 'car', 'fence', 'pole', 'tree']
 
     feature_names = ['height', 'root density', 'linearity', 'planarity', 'sphericity', 'omnivariance', 'anisotropy',
-                     'eigenentropy', 'sum of the eigen-features', 'change of curvature', 'x-range', 'y-range']
+                     'eigenentropy', 'sum of the eigen-features', 'change of curvature']
 
     path = "plots/"
 
@@ -254,7 +254,8 @@ def feature_vis_multiple(X):
         iters.append(i)
 
     combins = list(itertools.combinations(iters, 2))
-    for pair in combins:
+    bar_combins = tqdm(combins)
+    for pair in bar_combins:
         # initialize a plot
         fig, ax = plt.subplots()
         plt.title("feature subset visualization of 5 classes", fontsize="small")
@@ -268,6 +269,7 @@ def feature_vis_multiple(X):
         plt.draw()
         plt.savefig(path+"{0} - {1}.png".format(feature_names[pair[0]], feature_names[pair[1]]))
         plt.close()
+        bar_combins.set_description("Processing plot {0}-{1}".format(pair[0], pair[1]))
 
 
 def training_set(X, Y, t):
