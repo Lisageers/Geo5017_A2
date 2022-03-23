@@ -12,8 +12,8 @@ ID, X, Y = classification.data_loading()
 # X=features & Y=labels
 
 # # visualize features
-# print('Visualize the features')
-# classification.feature_vis_multiple(X=X)
+print('Visualize the features')
+classification.feature_vis_multiple(X=X)
 
 # # SVM classification
 # print('Get training set')
@@ -37,4 +37,4 @@ ID, X, Y = classification.data_loading()
 # classification.Evaluation(Y_rf_pred, Ye)
 
 # Learning curve
-classification.learningcurve(X, Y, 'rf')
+# classification.learningcurve(X, Y, 'rf')

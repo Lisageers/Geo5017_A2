@@ -1,3 +1,4 @@
+import sys
 import math
 import matplotlib.pyplot as plt
 import numpy as np
@@ -105,6 +106,27 @@ class urban_object:
         C_l = lambda_3/sum_l
         self.feature.append(C_l)
 
+        # features from A1
+        x_min = y_min = z_min = sys.float_info.max
+        x_max = y_max = z_max = -sys.float_info.max
+        for point in self.points:
+            if point[0] < x_min:
+                x_min = point[0]
+            if point[1] < y_min:
+                y_min = point[1]
+            if point[2] < z_min:
+                z_min = point[2]
+            if point[0] > x_max:
+                x_max = point[0]
+            if point[1] > y_max:
+                y_max = point[1]
+            if point[2] > z_max:
+                z_max = point[2]
+
+        # x-range, y-range, z-range
+        self.feature.append(abs(x_max-x_min))
+        self.feature.append(abs(y_max-y_min))
+
 
 def read_xyz(filenm):
     """
@@ -127,7 +149,7 @@ def feature_preparation(data_path):
         data_path: the path to read data
     """
     # check if the current data file exist
-    data_file = 'data_2.txt'
+    data_file = 'data_3.txt'
     if exists(data_file):
         return
 
@@ -165,11 +187,11 @@ def feature_preparation(data_path):
     outputs = np.array(input_data).astype(np.float32)
 
     # write the output to a local file
-    data_header = 'ID,label,root_density,linearity,planarity,sphericity,omnivariance,anisotropy'
+    data_header = 'ID,label,root_density,linearity,planarity,sphericity,omnivariance,anisotropy,x-range,y-range'
     np.savetxt(data_file, outputs, fmt='%10.5f', delimiter=',', newline='\n', header=data_header)
 
 
-def data_loading(data_file='data_2.txt'):
+def data_loading(data_file='data_3.txt'):
     """
     Read the data with features from the data file
         data_file: the local file to read data with features and labels
@@ -223,7 +245,7 @@ def feature_vis_multiple(X):
     labels = ['building', 'car', 'fence', 'pole', 'tree']
 
     feature_names = ['height', 'root density', 'linearity', 'planarity', 'sphericity', 'omnivariance', 'anisotropy',
-                     'eigenentropy', 'sum of the eigen-features', 'change of curvature']
+                     'eigenentropy', 'sum of the eigen-features', 'change of curvature', 'x-range', 'y-range']
 
     path = "plots/"
 
@@ -244,7 +266,7 @@ def feature_vis_multiple(X):
         plt.ylabel('x2: '+ feature_names[pair[1]])
         ax.legend()
         plt.draw()
-        plt.savefig(path+"{0}-{1}.png".format(feature_names[pair[0]], feature_names[pair[1]]))
+        plt.savefig(path+"{0} - {1}.png".format(feature_names[pair[0]], feature_names[pair[1]]))
         plt.close()
 
 
