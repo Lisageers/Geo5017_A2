@@ -56,6 +56,50 @@ class urban_object:
         root_density = 1.0*count[0] / len(self.points)
         self.feature.append(root_density)
 
+        # Geometric eigen-features
+        # mean of the points
+        p_mean = np.mean(self.points, axis=0)
+        # the covariance matrix
+        C_P = np.zeros((3,3))
+        for p in self.points:
+            p_ = np.expand_dims(p, axis=0)
+            p_mean_ = np.expand_dims(p_mean, axis=0)
+            C_P = C_P + np.multiply((p_-p_mean_), (p_-p_mean_).T)
+        C_P = C_P/len(self.points)
+        # compute the eigenvalues and corresponding eigenvectors
+        w, v = np.linalg.eig(C_P)
+        lambda_1 = w[0]
+        lambda_2 = w[1]
+        lambda_3 = w[2]
+
+        # eigen-features of linearity A_lambda
+        A_l = (lambda_1-lambda_2)/lambda_1
+        self.feature.append(A_l)
+        # planarity
+        P_l = (lambda_2-lambda_3)/lambda_3
+        self.feature.append(P_l)
+        # sphericity
+        S_l = lambda_3/lambda_1
+        self.feature.append(S_l)
+        # omnivariance
+        O_l = (lambda_1*lambda_2*lambda_3)**(1/3.0)
+        self.feature.append(O_l)
+        # anisotropy
+        A_l = (lambda_1-lambda_3)/lambda_1
+        self.feature.append(A_l)
+        # eigenentropy
+        E_l = 0.0
+        for i in range(3):
+            E_l = E_l + np.log(w[i])
+        E_l = -E_l
+        self.feature.append(E_l)
+        # sum
+        sum_l = lambda_1+lambda_2+lambda_3
+        self.feature.append(sum_l)
+        # the change of curvature
+        C_l = lambda_3/sum_l
+        self.feature.append(C_l)
+
 
 def read_xyz(filenm):
     """
@@ -78,7 +122,7 @@ def feature_preparation(data_path):
         data_path: the path to read data
     """
     # check if the current data file exist
-    data_file = 'data.txt'
+    data_file = 'data_2.txt'
     if exists(data_file):
         return
 
@@ -116,7 +160,8 @@ def feature_preparation(data_path):
     outputs = np.array(input_data).astype(np.float32)
 
     # write the output to a local file
-    data_header = 'ID,label,height,root_density'
+    data_header = 'ID,label,height,root_density,linearity,planarity,sphericity,omnivariance,anisotropy,eigenentropy,' \
+                  'sum_of_eigenvalues, change_of_curvature'
     np.savetxt(data_file, outputs, fmt='%10.5f', delimiter=',', newline='\n', header=data_header)
 
 
