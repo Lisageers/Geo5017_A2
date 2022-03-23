@@ -471,7 +471,26 @@ def Evaluation(Y_pred=None, Y_true=None):
     print("Confusion matrix:")
     print(cmatrix)
 
-
+def learningcurve(X, Y, model):
+    Xv = []
+    Yv = []
+    for i in range(9):
+        Xt, Yt, Xe, Ye = training_set(X, Y, ((i+1)/10))
+        if model == 'svm':
+            Y_svm_pred = SVM_classification(Xt, Yt, Xe)
+            Xv.append((i+1)/10)
+            Yv.append(accuracy_score(Y_svm_pred, Ye))
+            plt.title('Learning Curve using SVM')
+        if model == 'rf':
+            Y_rf_pred = RF_classification(Xt, Yt, Xe)
+            Xv.append((i+1)/10)
+            Yv.append(accuracy_score(Y_rf_pred, Ye))
+            plt.title('Learning Curve using RF')
+    plt.plot(Xv, Yv)
+    plt.xlabel('Test Split Ratio')
+    plt.ylabel('Overall Accuracy')
+    plt.show()
+    return
 
 if __name__=='__main__':
     # specify the data folder
