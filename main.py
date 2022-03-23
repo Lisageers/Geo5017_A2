@@ -7,13 +7,13 @@ print('Start preparing features')
 classification.feature_preparation(data_path=path)
 
 # load the data
-# print('Start loading data from the local file')
-# ID, X, Y = classification.data_loading()
-# # X=features & Y=labels
-#
-# # visualize features
-# # print('Visualize the features')
-# # feature_visualization(X=X)
+print('Start loading data from the local file')
+ID, X, Y = classification.data_loading()
+# X=features & Y=labels
+
+# visualize features
+print('Visualize the features')
+classification.feature_vis_multiple(X=X)
 #
 # # SVM classification
 # print('Get training set')

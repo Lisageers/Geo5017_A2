@@ -12,6 +12,8 @@ import glob
 from tqdm import tqdm
 from os.path import exists, join
 
+import itertools
+
 
 class urban_object:
     """
@@ -39,9 +41,12 @@ class urban_object:
     def compute_features(self):
         """
         Compute the features, here we provide two example features. You're encouraged to design your own features
+        10 features: height, root density, linearity, planarity, sphericity, omnivariance, anisotropy, eigenentropy,
+            sum of the eigen-features, change of curvature
         """
         # calculate the height
         height = np.amax(self.points[:, 2])
+
         self.feature.append(height)
 
         # get the root point
@@ -160,12 +165,11 @@ def feature_preparation(data_path):
     outputs = np.array(input_data).astype(np.float32)
 
     # write the output to a local file
-    data_header = 'ID,label,height,root_density,linearity,planarity,sphericity,omnivariance,anisotropy,eigenentropy,' \
-                  'sum_of_eigenvalues, change_of_curvature'
+    data_header = 'ID,label,root_density,linearity,planarity,sphericity,omnivariance,anisotropy'
     np.savetxt(data_file, outputs, fmt='%10.5f', delimiter=',', newline='\n', header=data_header)
 
 
-def data_loading(data_file='data.txt'):
+def data_loading(data_file='data_2.txt'):
     """
     Read the data with features from the data file
         data_file: the local file to read data with features and labels
@@ -206,6 +210,43 @@ def feature_visualization(X):
     plt.ylabel('x2: root density')
     ax.legend()
     plt.show()
+
+
+def feature_vis_multiple(X):
+    """
+    Visualize the features
+        X: input features. This assumes classes are stored in a sequential manner
+    """
+
+    # define the labels and corresponding colors
+    colors = ['firebrick', 'grey', 'darkorange', 'dodgerblue', 'olivedrab']
+    labels = ['building', 'car', 'fence', 'pole', 'tree']
+
+    feature_names = ['height', 'root density', 'linearity', 'planarity', 'sphericity', 'omnivariance', 'anisotropy',
+                     'eigenentropy', 'sum of the eigen-features', 'change of curvature']
+
+    path = "plots/"
+
+    iters = []
+    for i in range(X.shape[1]):
+        iters.append(i)
+
+    combins = list(itertools.combinations(iters, 2))
+    for pair in combins:
+        # initialize a plot
+        fig, ax = plt.subplots()
+        plt.title("feature subset visualization of 5 classes", fontsize="small")
+        for i in range(5):
+            ax.scatter(X[100 * i:100 * (i + 1), pair[0]], X[100 * i:100 * (i + 1), pair[1]], marker="o", c=colors[i],
+                       edgecolor="k",
+                       label=labels[i])
+        plt.xlabel('x1: '+ feature_names[pair[0]])
+        plt.ylabel('x2: '+ feature_names[pair[1]])
+        ax.legend()
+        plt.draw()
+        plt.savefig(path+"{0}-{1}.png".format(feature_names[pair[0]], feature_names[pair[1]]))
+        plt.close()
+
 
 def training_set(X, Y, t):
     """
