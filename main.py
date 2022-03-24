@@ -23,11 +23,11 @@ print('Get training set')
 # omnivariance - change of curvature
 set1 = [5, 9]
 # height - omnivariance
-set2 = [0, 5]
+set1 = [0, 5]
 # height - change of curvature
-set3 = [0, 9]
+set2 = [0, 9]
 # 4 features
-set4 = [0, 1, 5, 9]
+set3 = [0, 5, 9]
 # select from X
 X_ = X[:, set2]
 
