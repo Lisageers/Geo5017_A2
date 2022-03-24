@@ -286,6 +286,7 @@ def training_set(X, Y, t):
 
 def plotSVC(titles, Xe,Ye, models):
     # Set-up 2x2 grid for plotting.
+    print(titles)
     fig, sub = plt.subplots(2, 2)
     plt.subplots_adjust(wspace=0.4, hspace=0.4)
 
@@ -294,6 +295,7 @@ def plotSVC(titles, Xe,Ye, models):
     y_min, y_max = X1.min() - 1, X1.max() + 1
     xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.02), np.arange(y_min, y_max, 0.02))
 
+    pbar = tqdm(total=4)
     for clf, title, ax in zip(models, titles, sub.flatten()):
         Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
         Z = Z.reshape(xx.shape)
@@ -306,7 +308,8 @@ def plotSVC(titles, Xe,Ye, models):
         ax.set_xticks(())
         ax.set_yticks(())
         ax.set_title(title)
-
+        pbar.update(1)
+    pbar.close()
     plt.show()
 
 
@@ -337,10 +340,10 @@ def SVM_parameter_test(Xt, Yt, Xe, Ye, kernel):
         )
         models = (clf.fit(Xt, Yt) for clf in models)
         titles = (
-            "SVC with {kernel} kernel gamma=1 / n_features",
-            "SVC with {kernel} kernel gamma=1 / (n_features * X.var())",
-            "SVC with {kernel} kernel gamma=10",
-            "SVC with {kernel} kernel gamma=100"
+            f"SVC with {kernel} kernel gamma=1 / n_features",
+            f"SVC with {kernel} kernel gamma=1 / (n_features * X.var())",
+            f"SVC with {kernel} kernel gamma=10",
+            f"SVC with {kernel} kernel gamma=100"
         )
         plotSVC(titles, Xe,Ye, models)
 
