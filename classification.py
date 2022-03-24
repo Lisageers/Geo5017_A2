@@ -187,7 +187,7 @@ def feature_preparation(data_path):
     outputs = np.array(input_data).astype(np.float32)
 
     # write the output to a local file
-    data_header = 'ID,label,root_density,linearity,planarity,sphericity,omnivariance,anisotropy'
+    data_header = 'ID,label,height,root_density,linearity,planarity,sphericity,omnivariance,anisotropy,eigenentropy,sum_of_eigenvalues,change_of_curvature'
     np.savetxt(data_file, outputs, fmt='%10.5f', delimiter=',', newline='\n', header=data_header)
 
 

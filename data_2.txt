@@ -1,4 +1,4 @@
-# ID,label,root_density,linearity,planarity,sphericity,omnivariance,anisotropy
+# ID,label,height,root_density,linearity,planarity,sphericity,omnivariance,anisotropy,eigenentropy,sum_of_eigenvalues,change_of_curvature
    0.00000,   0.00000,  19.73000,   0.00276,   0.96825,  -0.85448,   0.21817,   1.72030,   0.78183, -20.83005,  11.28022,   0.17455
    1.00000,   0.00000,   8.47000,   0.00434,   0.91428,  -0.76179,   0.35984,   2.29444,   0.64016, -16.81540,  10.57589,   0.24893
    2.00000,   0.00000,  15.57000,   0.00145,   0.35727,   7.05745,   0.07977,   8.79633,   0.92023,-117.56519,  40.78563,   0.04631
