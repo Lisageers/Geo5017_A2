@@ -284,12 +284,12 @@ def training_set(X, Y, t):
     return Xt, Yt, Xe, Ye
 
 
-def plotSVC(titles, X, Y, models):
+def plotSVC(titles, Xe,Ye, models):
     # Set-up 2x2 grid for plotting.
     fig, sub = plt.subplots(2, 2)
     plt.subplots_adjust(wspace=0.4, hspace=0.4)
 
-    X0, X1 = X[:, 0], X[:, 1]  # decide which features we want to use to test the kernel methods
+    X0, X1 = Xe[:, 0], Xe[:, 1]  # decide which features we want to use to test the kernel methods
     x_min, x_max = X0.min() - 1, X0.max() + 1
     y_min, y_max = X1.min() - 1, X1.max() + 1
     xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.02), np.arange(y_min, y_max, 0.02))
@@ -298,11 +298,11 @@ def plotSVC(titles, X, Y, models):
         Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
         Z = Z.reshape(xx.shape)
         ax.contourf(xx, yy, Z)
-        ax.scatter(X0, X1, c=Y, cmap=plt.cm.coolwarm, s=20, edgecolors="k")
+        ax.scatter(X0, X1, c=Ye, cmap=plt.cm.coolwarm, s=20, edgecolors="k")
         ax.set_xlim(xx.min(), xx.max())
         ax.set_ylim(yy.min(), yy.max())
         ax.set_xlabel("Height")  # change this after feature selection!!
-        ax.set_ylabel("Root density")  # change this after feature selection!!
+        ax.set_ylabel("Omnivariance")  # change this after feature selection!!
         ax.set_xticks(())
         ax.set_yticks(())
         ax.set_title(title)
@@ -310,56 +310,59 @@ def plotSVC(titles, X, Y, models):
     plt.show()
 
 
-def SVM_parameter_test(X, Y):
-    # test C of linear kernel svm
+def SVM_parameter_test(Xt, Yt, Xe, Ye, kernel):
+    # test C of svm
     models = (
-        svm.SVC(kernel="linear", C=0.1),
-        svm.SVC(kernel="linear", C=1),
-        svm.SVC(kernel="linear", C=10),
-        svm.SVC(kernel="linear", C=100)
+        svm.SVC(kernel=kernel, C=0.1),
+        svm.SVC(kernel=kernel, C=1),
+        svm.SVC(kernel=kernel, C=10),
+        svm.SVC(kernel=kernel, C=100)
     )
-    models = (clf.fit(X, Y) for clf in models)
+    models = (clf.fit(Xt, Yt) for clf in models)
     titles = (
-        "SVC with linear kernel C=0.1",
-        "SVC with linear kernel C=1",
-        "SVC with linear kernel C=10",
-        "SVC with linear kernel C=100"
+        f"SVC with {kernel} kernel C=0.1",
+        f"SVC with {kernel} kernel C=1",
+        f"SVC with {kernel} kernel C=10",
+        f"SVC with {kernel} kernel C=100"
     )
-    plotSVC(titles, X,Y, models)
+    plotSVC(titles, Xe,Ye, models)
 
-    # test degree of poly kernel svm
-    models = (
-        svm.SVC(kernel="poly", degree=0),
-        svm.SVC(kernel="poly", degree=2),
-        svm.SVC(kernel="poly", degree=4),
-        svm.SVC(kernel="poly", degree=6)
-    )
-    models = (clf.fit(X, Y) for clf in models)
-    titles = (
-        "SVC with poly kernel degree=0",
-        "SVC with poly kernel degree=2",
-        "SVC with poly kernel degree=4",
-        "SVC with poly kernel degree=6"
-    )
-    plotSVC(titles, X,Y, models)
+    if kernel != "linear":
+        # test gamma svm
+        models = (
+            svm.SVC(kernel=kernel, gamma='auto'),
+            svm.SVC(kernel=kernel, gamma='scale'),
+            svm.SVC(kernel=kernel, gamma=10),
+            svm.SVC(kernel=kernel, gamma=100)
+        )
+        models = (clf.fit(Xt, Yt) for clf in models)
+        titles = (
+            "SVC with {kernel} kernel gamma=1 / n_features",
+            "SVC with {kernel} kernel gamma=1 / (n_features * X.var())",
+            "SVC with {kernel} kernel gamma=10",
+            "SVC with {kernel} kernel gamma=100"
+        )
+        plotSVC(titles, Xe,Ye, models)
 
-    # test gamma of rbf kernel svm
-    models = (
-        svm.SVC(kernel="rbf", gamma='auto'),
-        svm.SVC(kernel="rbf", gamma='scale'),
-        svm.SVC(kernel="rbf", gamma=10),
-        svm.SVC(kernel="rbf", gamma=100)
-    )
-    models = (clf.fit(X, Y) for clf in models)
-    titles = (
-        "SVC with rbf kernel gamma=1 / n_features",
-        "SVC with rbf kernel gamma=1 / (n_features * X.var())",
-        "SVC with rbf kernel gamma=10",
-        "SVC with rbf kernel gamma=100"
-    )
-    plotSVC(titles, X,Y, models)
+    if kernel == "poly":
+        # test degree svm
+        models = (
+            svm.SVC(kernel=kernel, degree=0),
+            svm.SVC(kernel=kernel, degree=2),
+            svm.SVC(kernel=kernel, degree=4),
+            svm.SVC(kernel=kernel, degree=6)
+        )
+        models = (clf.fit(Xt, Yt) for clf in models)
+        titles = (
+            f"SVC with {kernel} kernel degree=0",
+            f"SVC with {kernel} kernel degree=2",
+            f"SVC with {kernel} kernel degree=4",
+            f"SVC with {kernel} kernel degree=6"
+        )
+        plotSVC(titles, Xe,Ye, models)
 
-def SVM_kernel_test(X, Y):
+
+def SVM_kernel_test(Xt, Yt, Xe, Ye):
     """
     Conduct SVM kernel testing
         X: features
@@ -372,7 +375,7 @@ def SVM_kernel_test(X, Y):
         svm.SVC(kernel="rbf", gamma=0.7, C=C),
         svm.SVC(kernel="poly", degree=3, gamma="auto", C=C),
     )
-    models = (clf.fit(X, Y) for clf in models)
+    models = (clf.fit(Xt, Yt) for clf in models)
 
     # title for the plots
     titles = (
@@ -386,7 +389,7 @@ def SVM_kernel_test(X, Y):
     fig, sub = plt.subplots(2, 2)
     plt.subplots_adjust(wspace=0.4, hspace=0.4)
 
-    X0, X1 = X[:, 0], X[:, 1]  # decide which features we want to use to test the kernel methods
+    X0, X1 = Xe[:, 0], Xe[:, 1]  # decide which features we want to use to test the kernel methods
     x_min, x_max = X0.min() - 1, X0.max() + 1
     y_min, y_max = X1.min() - 1, X1.max() + 1
     xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.02), np.arange(y_min, y_max, 0.02))
@@ -395,11 +398,11 @@ def SVM_kernel_test(X, Y):
         Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
         Z = Z.reshape(xx.shape)
         ax.contourf(xx, yy, Z)
-        ax.scatter(X0, X1, c=Y, cmap=plt.cm.coolwarm, s=20, edgecolors="k")
+        ax.scatter(X0, X1, c=Ye, cmap=plt.cm.coolwarm, s=20, edgecolors="k")
         ax.set_xlim(xx.min(), xx.max())
         ax.set_ylim(yy.min(), yy.max())
         ax.set_xlabel("Height")  # change this after feature selection!!
-        ax.set_ylabel("Root density")  # change this after feature selection!!
+        ax.set_ylabel("Omnivariance")  # change this after feature selection!!
         ax.set_xticks(())
         ax.set_yticks(())
         ax.set_title(title)
@@ -420,7 +423,7 @@ def SVM_classification(Xt, Yt, Xe):
     return predicted_labels
 
 
-def RF_parameter_test(X, Y):
+def RF_parameter_test(Xt, Yt, Xe, Ye):
     # test nr of trees
     models = (
         RandomForestClassifier(n_estimators=1),
@@ -428,26 +431,26 @@ def RF_parameter_test(X, Y):
         RandomForestClassifier(n_estimators=100),
         RandomForestClassifier(n_estimators=1000)
     )
-    models = (clf.fit(X, Y) for clf in models)
+    models = (clf.fit(Xt, Yt) for clf in models)
     titles = (
         "RF with 1 tree",
         "RF with 10 trees",
         "RF with 100 trees",
         "RF with 1000 trees"
     )
-    plotSVC(titles, X,Y, models)
+    plotSVC(titles, Xe,Ye, models)
 
     # test criterion
     models = (
         RandomForestClassifier(criterion="gini"),
         RandomForestClassifier(criterion="entropy")
     )
-    models = (clf.fit(X, Y) for clf in models)
+    models = (clf.fit(Xt, Yt) for clf in models)
     titles = (
         "RF with gini",
         "RF with entropy"
     )
-    plotSVC(titles, X,Y, models)
+    plotSVC(titles, Xe,Ye, models)
 
     # test max features considered at split
     models = (
@@ -456,14 +459,14 @@ def RF_parameter_test(X, Y):
         RandomForestClassifier(max_features=1),
         RandomForestClassifier(max_features=None),
     )
-    models = (clf.fit(X, Y) for clf in models)
+    models = (clf.fit(Xt, Yt) for clf in models)
     titles = (
         "RF with max_features=sqrt(n_features)",
         "RF with max_features=log2(n_features)",
         "RF with max_features=1",
         "RF with max_features=n_features"
     )
-    plotSVC(titles, X,Y, models)
+    plotSVC(titles, Xe,Ye, models)
 
 def RF_classification(Xt, Yt, Xe):
     """
@@ -541,13 +544,13 @@ if __name__=='__main__':
     
     # SVM classification
     print('Start SVM classification')
-    SVM_parameter_test(X, Y) # not sure if we should use training or whole set?
-    SVM_kernel_test(X, Y)
+    # SVM_parameter_test(X, Y) # not sure if we should use training or whole set?
+    # SVM_kernel_test(X, Y)
     Y_svm_pred = SVM_classification(Xt, Yt, Xe)
 
     # RF classification
     print('Start RF classification')
-    RF_parameter_test(X, Y)
+    # RF_parameter_test(X, Y)
     Y_rf_pred = RF_classification(Xt, Yt, Xe)
 
     # Evaluate results
