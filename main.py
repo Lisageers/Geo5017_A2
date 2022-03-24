@@ -20,29 +20,27 @@ ID, X, Y = classification.data_loading()
 
 # SVM classification
 print('Get training set')
-# height - root density
-set1 = [0, 1]
 # height - omnivariance
-set2 = [0, 5]
+set1 = [0, 5]
 # height - change of curvature
-set3 = [0, 9]
+set2 = [0, 9]
 # 4 features
-set4 = [0, 1, 5, 9]
+set3 = [0, 5, 9]
 # select from X
-X_ = X[:, set1]
+X_ = X[:, set3]
 
 Xt, Yt, Xe, Ye = classification.training_set(X_, Y, 0.6)  # beware this is random
 # Xt&Yt are training, Xe&Ye are evaluating/test set
 
 # SVM classification
 print('Start SVM classification')
-classification.SVM_parameter_test(Xt, Yt) # not sure if we should use training or whole set?
-classification.SVM_kernel_test(Xt, Yt)
+# classification.SVM_parameter_test(Xt, Yt) # not sure if we should use training or whole set?
+# classification.SVM_kernel_test(Xt, Yt)
 Y_svm_pred = classification.SVM_classification(Xt, Yt, Xe)
 
 # RF classification
 print('Start RF classification')
-classification.RF_parameter_test(Xt, Yt)
+# classification.RF_parameter_test(Xt, Yt)
 Y_rf_pred = classification.RF_classification(Xt, Yt, Xe)
 
 # Evaluate results
