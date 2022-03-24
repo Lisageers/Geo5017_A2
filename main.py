@@ -23,35 +23,40 @@ print('Get training set')
 # omnivariance - change of curvature
 set1 = [5, 9]
 # height - omnivariance
-set1 = [0, 5]
+set2 = [0, 5]
 # height - change of curvature
-set2 = [0, 9]
-# 4 features
-set3 = [0, 5, 9]
+set3 = [0, 9]
+# 3 features
+set4 = [0, 5, 9]
 # select from X
-X_ = X[:, set2]
+X_ = X[:, set4]
 
 Xt, Yt, Xe, Ye = classification.training_set(X_, Y, 0.6)  # beware this is random
 # Xt&Yt are training, Xe&Ye are evaluating/test set
 
-# SVM classification
-print('Start SVM classification')
-classification.SVM_parameter_test(Xt, Yt, Xe, Ye, "linear")
-classification.SVM_parameter_test(Xt, Yt, Xe, Ye, "sigmoid")
-classification.SVM_parameter_test(Xt, Yt, Xe, Ye, "rbf")
-classification.SVM_parameter_test(Xt, Yt, Xe, Ye, "poly")
+# # SVM classification
+# print('Start SVM classification')
+# classification.SVM_parameter_test(Xt, Yt, Xe, Ye, "linear")
+# classification.SVM_parameter_test(Xt, Yt, Xe, Ye, "sigmoid")
+# classification.SVM_parameter_test(Xt, Yt, Xe, Ye, "rbf")
+# classification.SVM_parameter_test(Xt, Yt, Xe, Ye, "poly")
 # classification.SVM_kernel_test(Xt, Yt, Xe, Ye)
-Y_svm_pred = classification.SVM_classification(Xt, Yt, Xe)
+classification.SVM_parameter_eval(Xt, Yt, Xe, Ye, "linear")
+classification.SVM_parameter_eval(Xt, Yt, Xe, Ye, "sigmoid")
+classification.SVM_parameter_eval(Xt, Yt, Xe, Ye, "rbf")
+classification.SVM_parameter_eval(Xt, Yt, Xe, Ye, "poly")
+# Y_svm_pred = classification.SVM_classification(Xt, Yt, Xe)
 
 # RF classification
-print('Start RF classification')
+# print('Start RF classification')
 # classification.RF_parameter_test(Xt, Yt, Xe, Ye)
-Y_rf_pred = classification.RF_classification(Xt, Yt, Xe)
+classification.RF_parameter_eval(Xt, Yt, Xe, Ye)
+# Y_rf_pred = classification.RF_classification(Xt, Yt, Xe)
 
-# Evaluate results
-print('Start evaluating the result')
-classification.Evaluation(Y_svm_pred, Ye)
-classification.Evaluation(Y_rf_pred, Ye)
+# # Evaluate results
+# print('Start evaluating the result')
+# classification.Evaluation(Y_svm_pred, Ye)
+# classification.Evaluation(Y_rf_pred, Ye)
 
-# Learning curve
-# classification.learningcurve(X_, Y, 'rf')
+# # Learning curve
+# classification.learningcurve(X_, Y, 'svm')

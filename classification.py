@@ -335,8 +335,8 @@ def SVM_parameter_test(Xt, Yt, Xe, Ye, kernel):
         models = (
             svm.SVC(kernel=kernel, gamma='auto'),
             svm.SVC(kernel=kernel, gamma='scale'),
-            svm.SVC(kernel=kernel, gamma=10),
-            svm.SVC(kernel=kernel, gamma=100)
+            svm.SVC(kernel=kernel, gamma=5),
+            svm.SVC(kernel=kernel, gamma=10)
         )
         models = (clf.fit(Xt, Yt) for clf in models)
         titles = (
@@ -425,6 +425,68 @@ def SVM_classification(Xt, Yt, Xe):
     predicted_labels = clf.predict(Xe)
     return predicted_labels
 
+def SVM_parameter_eval(Xt, Yt, Xe, Ye, kernel):
+    Clist = [0.1, 1, 10, 100]
+    gammalist = ['auto', 'scale', 5, 10]
+    degreelist = [0, 2, 4, 6]
+    
+    for i in Clist:
+        clf = svm.SVC(kernel=kernel,C=i)
+        clf.fit(Xt, Yt)
+        predicted_labels = clf.predict(Xe)
+        print('========================================')
+        print('Kernel: ' + kernel + ', C: ' + str(i))
+        print('========================================')
+        Evaluation(predicted_labels, Ye)
+
+    if kernel != 'linear':
+        for j in gammalist:
+            clf = svm.SVC(kernel=kernel,gamma=j)
+            clf.fit(Xt, Yt)
+            predicted_labels = clf.predict(Xe)
+            print('========================================')
+            print('Kernel: ' + kernel + ', gamma: ' + str(j))
+            print('========================================')
+            Evaluation(predicted_labels, Ye)
+    if kernel == 'poly':
+        for x in degreelist:
+            clf = svm.SVC(kernel=kernel,degree=x)
+            clf.fit(Xt, Yt)
+            predicted_labels = clf.predict(Xe)
+            print('========================================')
+            print('Kernel: ' + kernel + ', degree: ' + str(x))
+            print('========================================')
+            Evaluation(predicted_labels, Ye)
+
+def RF_parameter_eval(Xt, Yt, Xe, Ye):
+    nlist = [1, 10, 100, 1000]
+    critlist = ["gini", "entropy"]
+    splitlist = ["auto", "log2", 1, None]
+
+    for i in nlist:
+        clf = RandomForestClassifier(n_estimators=i, criterion="gini", max_features="auto")
+        clf.fit(Xt, Yt)
+        predicted_labels = clf.predict(Xe)
+        print('========================================')
+        print('n_estimators=' + str(i))
+        print('========================================')
+        Evaluation(predicted_labels, Ye)
+    for j in critlist:
+        clf = RandomForestClassifier(criterion=j)
+        clf.fit(Xt, Yt)
+        predicted_labels = clf.predict(Xe)
+        print('========================================')
+        print('n_estimators=' + str(j))
+        print('========================================')
+        Evaluation(predicted_labels, Ye)
+    for x in splitlist:
+        clf = RandomForestClassifier(max_features=x)
+        clf.fit(Xt, Yt)
+        predicted_labels = clf.predict(Xe)
+        print('========================================')
+        print('n_estimators=' + str(x))
+        print('========================================')
+        Evaluation(predicted_labels, Ye)
 
 def RF_parameter_test(Xt, Yt, Xe, Ye):
     # test nr of trees
@@ -520,7 +582,6 @@ def learningcurve(X, Y, model):
     plt.xlabel('Test Split Ratio')
     plt.ylabel('Overall Accuracy')
     plt.show()
-    return
 
 if __name__=='__main__':
     # specify the data folder
