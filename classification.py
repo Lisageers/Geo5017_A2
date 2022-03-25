@@ -464,7 +464,7 @@ def RF_parameter_eval(Xt, Yt, Xe, Ye):
     splitlist = ["auto", "log2", 1, None]
 
     for i in nlist:
-        clf = RandomForestClassifier(n_estimators=i, criterion="gini", max_features="auto")
+        clf = RandomForestClassifier(n_estimators=i)
         clf.fit(Xt, Yt)
         predicted_labels = clf.predict(Xe)
         print('========================================')
@@ -476,7 +476,7 @@ def RF_parameter_eval(Xt, Yt, Xe, Ye):
         clf.fit(Xt, Yt)
         predicted_labels = clf.predict(Xe)
         print('========================================')
-        print('n_estimators=' + str(j))
+        print('Criterion=' + str(j))
         print('========================================')
         Evaluation(predicted_labels, Ye)
     for x in splitlist:
@@ -484,7 +484,7 @@ def RF_parameter_eval(Xt, Yt, Xe, Ye):
         clf.fit(Xt, Yt)
         predicted_labels = clf.predict(Xe)
         print('========================================')
-        print('n_estimators=' + str(x))
+        print('max_features=' + str(x))
         print('========================================')
         Evaluation(predicted_labels, Ye)
 
