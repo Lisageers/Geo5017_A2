@@ -29,7 +29,7 @@ set3 = [0, 9]
 # 3 features
 set4 = [0, 5, 9]
 # select from X
-X_ = X[:, set4]
+X_ = X[:, set3]
 
 Xt, Yt, Xe, Ye = classification.training_set(X_, Y, 0.6)  # beware this is random
 # Xt&Yt are training, Xe&Ye are evaluating/test set
@@ -40,7 +40,7 @@ Xt, Yt, Xe, Ye = classification.training_set(X_, Y, 0.6)  # beware this is rando
 # classification.SVM_parameter_test(Xt, Yt, Xe, Ye, "sigmoid")
 # classification.SVM_parameter_test(Xt, Yt, Xe, Ye, "rbf")
 # classification.SVM_parameter_test(Xt, Yt, Xe, Ye, "poly")
-# classification.SVM_kernel_test(Xt, Yt, Xe, Ye)
+classification.SVM_kernel_test(Xt, Yt, Xe, Ye)
 # classification.SVM_parameter_eval(Xt, Yt, Xe, Ye, "linear")
 # classification.SVM_parameter_eval(Xt, Yt, Xe, Ye, "sigmoid")
 # classification.SVM_parameter_eval(Xt, Yt, Xe, Ye, "rbf")

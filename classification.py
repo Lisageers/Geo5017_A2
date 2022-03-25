@@ -304,7 +304,7 @@ def plotSVC(titles, Xe,Ye, models):
         ax.set_xlim(xx.min(), xx.max())
         ax.set_ylim(yy.min(), yy.max())
         ax.set_xlabel("Height")  # change this after feature selection!!
-        ax.set_ylabel("Omnivariance")  # change this after feature selection!!
+        ax.set_ylabel("Change of curvature")  # change this after feature selection!!
         ax.set_xticks(())
         ax.set_yticks(())
         ax.set_title(title)
@@ -371,46 +371,43 @@ def SVM_kernel_test(Xt, Yt, Xe, Ye):
         X: features
         Y: labels
     """
-    C = 1.0  # SVM regularization parameter
+
     models = (
-        svm.SVC(kernel="linear", C=C),
-        svm.SVC(kernel="sigmoid", C=C, gamma="auto"),
-        svm.SVC(kernel="rbf", gamma=0.7, C=C),
-        svm.SVC(kernel="poly", degree=3, gamma="auto", C=C),
+        svm.SVC(kernel="linear", C=100),
+        svm.SVC(kernel="rbf", gamma="auto", C=100),
+        svm.SVC(kernel="sigmoid", C=100, gamma=10),
+        svm.SVC(kernel="sigmoid", C=0.1, gamma=10),
+        # svm.SVC(kernel="poly", degree=3, gamma=5, C=100)
     )
     models = (clf.fit(Xt, Yt) for clf in models)
 
     # title for the plots
     titles = (
-        "SVC with linear kernel",
-        "SVC with sigmoid kernel",
-        "SVC with RBF kernel",
-        "SVC with polynomial kernel",
+        "SVC with linear kernel C=100",
+        "SVC with RBF kernel gamma=1/n, C=100",
+        "SVC with sigmoid kernel C=100, gamma=10",
+        "SVC with sigmoid kernel C=0.1, gamma=10",
+        # "SVC with polynomial kernel degree=3, gamma=5, C=100"
     )
+    plotSVC(titles, Xe,Ye, models)
 
-    # Set-up 2x2 grid for plotting.
-    fig, sub = plt.subplots(2, 2)
-    plt.subplots_adjust(wspace=0.4, hspace=0.4)
+    models = (
+        svm.SVC(kernel="sigmoid", C=100, gamma="auto"),
+        svm.SVC(kernel="sigmoid", C=0.1, gamma="auto"),
+        svm.SVC(kernel="sigmoid", C=100, gamma=5),
+        svm.SVC(kernel="sigmoid", C=0.1, gamma=5)
+    )
+    models = (clf.fit(Xt, Yt) for clf in models)
 
-    X0, X1 = Xe[:, 0], Xe[:, 1]  # decide which features we want to use to test the kernel methods
-    x_min, x_max = X0.min() - 1, X0.max() + 1
-    y_min, y_max = X1.min() - 1, X1.max() + 1
-    xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.02), np.arange(y_min, y_max, 0.02))
+    # title for the plots
+    titles = (
+        "SVC with sigmoid kernel C=100, gamma=1/n",
+        "SVC with sigmoid kernel C=0.1, gamma=1/n",
+        "SVC with sigmoid kernel C=100, gamma=5",
+        "SVC with sigmoid kernel C=0.1, gamma=5"
+    )
+    plotSVC(titles, Xe,Ye, models)
 
-    for clf, title, ax in zip(models, titles, sub.flatten()):
-        Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
-        Z = Z.reshape(xx.shape)
-        ax.contourf(xx, yy, Z)
-        ax.scatter(X0, X1, c=Ye, cmap=plt.cm.coolwarm, s=20, edgecolors="k")
-        ax.set_xlim(xx.min(), xx.max())
-        ax.set_ylim(yy.min(), yy.max())
-        ax.set_xlabel("Height")  # change this after feature selection!!
-        ax.set_ylabel("Omnivariance")  # change this after feature selection!!
-        ax.set_xticks(())
-        ax.set_yticks(())
-        ax.set_title(title)
-
-    plt.show()
 
 def SVM_classification(Xt, Yt, Xe):
     """
