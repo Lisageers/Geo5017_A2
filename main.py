@@ -41,22 +41,22 @@ Xt, Yt, Xe, Ye = classification.training_set(X_, Y, 0.6)  # beware this is rando
 # classification.SVM_parameter_test(Xt, Yt, Xe, Ye, "rbf")
 # classification.SVM_parameter_test(Xt, Yt, Xe, Ye, "poly")
 # classification.SVM_kernel_test(Xt, Yt, Xe, Ye)
-classification.SVM_parameter_eval(Xt, Yt, Xe, Ye, "linear")
-classification.SVM_parameter_eval(Xt, Yt, Xe, Ye, "sigmoid")
-classification.SVM_parameter_eval(Xt, Yt, Xe, Ye, "rbf")
-classification.SVM_parameter_eval(Xt, Yt, Xe, Ye, "poly")
-# Y_svm_pred = classification.SVM_classification(Xt, Yt, Xe)
+# classification.SVM_parameter_eval(Xt, Yt, Xe, Ye, "linear")
+# classification.SVM_parameter_eval(Xt, Yt, Xe, Ye, "sigmoid")
+# classification.SVM_parameter_eval(Xt, Yt, Xe, Ye, "rbf")
+# classification.SVM_parameter_eval(Xt, Yt, Xe, Ye, "poly")
+Y_svm_pred = classification.SVM_classification(Xt, Yt, Xe)
 
 # RF classification
 # print('Start RF classification')
 # classification.RF_parameter_test(Xt, Yt, Xe, Ye)
-classification.RF_parameter_eval(Xt, Yt, Xe, Ye)
-# Y_rf_pred = classification.RF_classification(Xt, Yt, Xe)
+# classification.RF_parameter_eval(Xt, Yt, Xe, Ye)
+Y_rf_pred = classification.RF_classification(Xt, Yt, Xe)
 
 # # Evaluate results
 # print('Start evaluating the result')
-# classification.Evaluation(Y_svm_pred, Ye)
-# classification.Evaluation(Y_rf_pred, Ye)
+classification.Evaluation(Y_svm_pred, Ye)
+classification.Evaluation(Y_rf_pred, Ye)
 
 # # Learning curve
 # classification.learningcurve(X_, Y, 'svm')

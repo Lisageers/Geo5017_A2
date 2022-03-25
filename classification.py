@@ -558,7 +558,7 @@ def Evaluation(Y_pred=None, Y_true=None):
     print("mean per-class accuracy")
     cmatrix = confusion_matrix(Y_true, Y_pred)
     # check if correct, doesnt work well when nr of pred classes is higher than nr of true classes:
-    print(cmatrix.diagonal()/cmatrix.sum(axis=1))
+    print(cmatrix.diagonal()/cmatrix.sum(axis=1)/5)
 
     print("Confusion matrix:")
     print(cmatrix)
