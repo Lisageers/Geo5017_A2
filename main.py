@@ -45,18 +45,26 @@ classification.SVM_kernel_test(Xt, Yt, Xe, Ye)
 # classification.SVM_parameter_eval(Xt, Yt, Xe, Ye, "sigmoid")
 # classification.SVM_parameter_eval(Xt, Yt, Xe, Ye, "rbf")
 # classification.SVM_parameter_eval(Xt, Yt, Xe, Ye, "poly")
-Y_svm_pred = classification.SVM_classification(Xt, Yt, Xe)
+# print("run SVM classification")
+# Y_svm_pred = classification.SVM_classification(Xt, Yt, Xe)
+# Y_svm_pred_1 = classification.Bagging_SVC(Xt, Yt, Xe)
+
 
 # RF classification
 # print('Start RF classification')
 # classification.RF_parameter_test(Xt, Yt, Xe, Ye)
 # classification.RF_parameter_eval(Xt, Yt, Xe, Ye)
-Y_rf_pred = classification.RF_classification(Xt, Yt, Xe)
+# print("run RF classification")
+# Y_rf_pred = classification.RF_classification(Xt, Yt, Xe)
 
 # # Evaluate results
 # print('Start evaluating the result')
-classification.Evaluation(Y_svm_pred, Ye)
-classification.Evaluation(Y_rf_pred, Ye)
+# classification.Evaluation(Y_svm_pred, Ye)
+# classification.Evaluation(Y_svm_pred_1, Ye)
+# classification.Evaluation(Y_rf_pred, Ye)
+
+# random features vs. picked ones
+classification.random_feature_test(X,Y, set4, 6)
 
 # # Learning curve
 # classification.learningcurve(X_, Y, 'svm')

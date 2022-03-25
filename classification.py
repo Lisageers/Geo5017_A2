@@ -2,9 +2,11 @@ import sys
 import math
 import matplotlib.pyplot as plt
 import numpy as np
+import random
 from sklearn.neighbors import KDTree
 from sklearn import svm
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.ensemble import RandomForestClassifier, BaggingClassifier
 from sklearn.datasets import make_classification
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
@@ -20,6 +22,7 @@ class urban_object:
     """
     Define an urban object
     """
+
     def __init__(self, filenm):
         """
         Initialize the object
@@ -31,7 +34,7 @@ class urban_object:
         self.cloud_ID = int(self.cloud_name)
 
         # obtain the label
-        self.label = math.floor(1.0*self.cloud_ID/100)
+        self.label = math.floor(1.0 * self.cloud_ID / 100)
 
         # obtain the points
         self.points = read_xyz(filenm)
@@ -59,19 +62,19 @@ class urban_object:
         # compute the root point planar density
         radius_root = 0.2
         count = kd_tree_2d.query_radius(root[:, :2], r=radius_root, count_only=True)
-        root_density = 1.0*count[0] / len(self.points)
+        root_density = 1.0 * count[0] / len(self.points)
         self.feature.append(root_density)
 
         # Geometric eigen-features
         # mean of the points
         p_mean = np.mean(self.points, axis=0)
         # the covariance matrix
-        C_P = np.zeros((3,3))
+        C_P = np.zeros((3, 3))
         for p in self.points:
             p_ = np.expand_dims(p, axis=0)
             p_mean_ = np.expand_dims(p_mean, axis=0)
-            C_P = C_P + np.multiply((p_-p_mean_), (p_-p_mean_).T)
-        C_P = C_P/len(self.points)
+            C_P = C_P + np.multiply((p_ - p_mean_), (p_ - p_mean_).T)
+        C_P = C_P / len(self.points)
         # compute the eigenvalues and corresponding eigenvectors
         w, v = np.linalg.eig(C_P)
         lambda_1 = w[0]
@@ -79,31 +82,31 @@ class urban_object:
         lambda_3 = w[2]
 
         # eigen-features of linearity A_lambda
-        A_l = (lambda_1-lambda_2)/lambda_1
+        A_l = (lambda_1 - lambda_2) / lambda_1
         self.feature.append(A_l)
         # planarity
-        P_l = (lambda_2-lambda_3)/lambda_3
+        P_l = (lambda_2 - lambda_3) / lambda_3
         self.feature.append(P_l)
         # sphericity
-        S_l = lambda_3/lambda_1
+        S_l = lambda_3 / lambda_1
         self.feature.append(S_l)
         # omnivariance
-        O_l = (lambda_1*lambda_2*lambda_3)**(1/3.0)
+        O_l = (lambda_1 * lambda_2 * lambda_3) ** (1 / 3.0)
         self.feature.append(O_l)
         # anisotropy
-        A_l = (lambda_1-lambda_3)/lambda_1
+        A_l = (lambda_1 - lambda_3) / lambda_1
         self.feature.append(A_l)
         # eigenentropy
         E_l = 0.0
         for i in range(3):
-            E_l = E_l + w[i]*np.log(w[i])
+            E_l = E_l + w[i] * np.log(w[i])
         E_l = -E_l
         self.feature.append(E_l)
         # sum
-        sum_l = lambda_1+lambda_2+lambda_3
+        sum_l = lambda_1 + lambda_2 + lambda_3
         self.feature.append(sum_l)
         # the change of curvature
-        C_l = lambda_3/sum_l
+        C_l = lambda_3 / sum_l
         self.feature.append(C_l)
 
         # features from A1
@@ -222,7 +225,8 @@ def feature_visualization(X):
 
     # plot the data with first two features
     for i in range(5):
-        ax.scatter(X[100*i:100*(i+1), 0], X[100*i:100*(i+1), 1], marker="o", c=colors[i], edgecolor="k", label=labels[i])
+        ax.scatter(X[100 * i:100 * (i + 1), 0], X[100 * i:100 * (i + 1), 1], marker="o", c=colors[i], edgecolor="k",
+                   label=labels[i])
 
     # show the figure with labels
     """
@@ -263,11 +267,11 @@ def feature_vis_multiple(X):
             ax.scatter(X[100 * i:100 * (i + 1), pair[0]], X[100 * i:100 * (i + 1), pair[1]], marker="o", c=colors[i],
                        edgecolor="k",
                        label=labels[i])
-        plt.xlabel('x1: '+ feature_names[pair[0]])
-        plt.ylabel('x2: '+ feature_names[pair[1]])
+        plt.xlabel('x1: ' + feature_names[pair[0]])
+        plt.ylabel('x2: ' + feature_names[pair[1]])
         ax.legend()
         plt.draw()
-        plt.savefig(path+"{0} - {1}.png".format(feature_names[pair[0]], feature_names[pair[1]]))
+        plt.savefig(path + "{0} - {1}.png".format(feature_names[pair[0]], feature_names[pair[1]]))
         plt.close()
         bar_combins.set_description("Processing plot {0}-{1}".format(pair[0], pair[1]))
 
@@ -284,7 +288,7 @@ def training_set(X, Y, t):
     return Xt, Yt, Xe, Ye
 
 
-def plotSVC(titles, Xe,Ye, models):
+def plotSVC(titles, Xe, Ye, models):
     # Set-up 2x2 grid for plotting.
     print(titles)
     fig, sub = plt.subplots(2, 2)
@@ -328,7 +332,7 @@ def SVM_parameter_test(Xt, Yt, Xe, Ye, kernel):
         f"SVC with {kernel} kernel C=10",
         f"SVC with {kernel} kernel C=100"
     )
-    plotSVC(titles, Xe,Ye, models)
+    plotSVC(titles, Xe, Ye, models)
 
     if kernel != "linear":
         # test gamma svm
@@ -345,7 +349,7 @@ def SVM_parameter_test(Xt, Yt, Xe, Ye, kernel):
             f"SVC with {kernel} kernel gamma=10",
             f"SVC with {kernel} kernel gamma=100"
         )
-        plotSVC(titles, Xe,Ye, models)
+        plotSVC(titles, Xe, Ye, models)
 
     if kernel == "poly":
         # test degree svm
@@ -362,7 +366,7 @@ def SVM_parameter_test(Xt, Yt, Xe, Ye, kernel):
             f"SVC with {kernel} kernel degree=4",
             f"SVC with {kernel} kernel degree=6"
         )
-        plotSVC(titles, Xe,Ye, models)
+        plotSVC(titles, Xe, Ye, models)
 
 
 def SVM_kernel_test(Xt, Yt, Xe, Ye):
@@ -409,6 +413,7 @@ def SVM_kernel_test(Xt, Yt, Xe, Ye):
     plotSVC(titles, Xe,Ye, models)
 
 
+
 def SVM_classification(Xt, Yt, Xe):
     """
     Conduct SVM classification
@@ -416,19 +421,29 @@ def SVM_classification(Xt, Yt, Xe):
         Yt: labels training set
         Xe: features evaluation/test set
     """
-    C = 1.0  # SVM regularization parameter
-    clf = svm.SVC(kernel="linear", C=C) # need to change the kernel after tests!!
+    C = 100  # SVM regularization parameter
+    clf = svm.SVC(kernel="poly", C=100, gamma=5, degree=4)  # need to change the kernel after tests!!
     clf.fit(Xt, Yt)
     predicted_labels = clf.predict(Xe)
     return predicted_labels
+
+
+def Bagging_SVC(Xt, Yt, Xe):
+    n_estimators = 5
+    clf = BaggingClassifier(svm.SVC(kernel="poly", C=100, gamma=5, degree=4), n_jobs=-1,
+                            max_samples=1.0 / n_estimators, n_estimators=n_estimators)
+    clf.fit(Xt, Yt)
+    predicted_labels = clf.predict(Xe)
+    return predicted_labels
+
 
 def SVM_parameter_eval(Xt, Yt, Xe, Ye, kernel):
     Clist = [0.1, 1, 10, 100]
     gammalist = ['auto', 'scale', 5, 10]
     degreelist = [0, 2, 4, 6]
-    
+
     for i in Clist:
-        clf = svm.SVC(kernel=kernel,C=i)
+        clf = svm.SVC(kernel=kernel, C=i)
         clf.fit(Xt, Yt)
         predicted_labels = clf.predict(Xe)
         print('========================================')
@@ -438,7 +453,7 @@ def SVM_parameter_eval(Xt, Yt, Xe, Ye, kernel):
 
     if kernel != 'linear':
         for j in gammalist:
-            clf = svm.SVC(kernel=kernel,gamma=j)
+            clf = svm.SVC(kernel=kernel, gamma=j)
             clf.fit(Xt, Yt)
             predicted_labels = clf.predict(Xe)
             print('========================================')
@@ -447,13 +462,14 @@ def SVM_parameter_eval(Xt, Yt, Xe, Ye, kernel):
             Evaluation(predicted_labels, Ye)
     if kernel == 'poly':
         for x in degreelist:
-            clf = svm.SVC(kernel=kernel,degree=x)
+            clf = svm.SVC(kernel=kernel, degree=x)
             clf.fit(Xt, Yt)
             predicted_labels = clf.predict(Xe)
             print('========================================')
             print('Kernel: ' + kernel + ', degree: ' + str(x))
             print('========================================')
             Evaluation(predicted_labels, Ye)
+
 
 def RF_parameter_eval(Xt, Yt, Xe, Ye):
     nlist = [1, 10, 100, 1000]
@@ -485,6 +501,7 @@ def RF_parameter_eval(Xt, Yt, Xe, Ye):
         print('========================================')
         Evaluation(predicted_labels, Ye)
 
+
 def RF_parameter_test(Xt, Yt, Xe, Ye):
     # test nr of trees
     models = (
@@ -500,7 +517,7 @@ def RF_parameter_test(Xt, Yt, Xe, Ye):
         "RF with 100 trees",
         "RF with 1000 trees"
     )
-    plotSVC(titles, Xe,Ye, models)
+    plotSVC(titles, Xe, Ye, models)
 
     # test criterion
     models = (
@@ -512,7 +529,7 @@ def RF_parameter_test(Xt, Yt, Xe, Ye):
         "RF with gini",
         "RF with entropy"
     )
-    plotSVC(titles, Xe,Ye, models)
+    plotSVC(titles, Xe, Ye, models)
 
     # test max features considered at split
     models = (
@@ -528,7 +545,8 @@ def RF_parameter_test(Xt, Yt, Xe, Ye):
         "RF with max_features=1",
         "RF with max_features=n_features"
     )
-    plotSVC(titles, Xe,Ye, models)
+    plotSVC(titles, Xe, Ye, models)
+
 
 def RF_classification(Xt, Yt, Xe):
     """
@@ -537,7 +555,8 @@ def RF_classification(Xt, Yt, Xe):
         Yt: labels training set
         Xe: features evaluation/test set
     """
-    clf = RandomForestClassifier(n_estimators=100, criterion="gini", max_features="auto") # we should do tests with these parameters
+    clf = RandomForestClassifier(n_estimators=100, criterion="gini",
+                                 max_features=None)  # we should do tests with these parameters
     clf.fit(Xt, Yt)
     predicted_labels = clf.predict(Xe)
     return predicted_labels
@@ -550,29 +569,30 @@ def Evaluation(Y_pred=None, Y_true=None):
         Y_true: true labels
     """
     print("Overall accuracy:")
-    print(accuracy_score(Y_true, Y_pred)) # 0 to 1
+    print(accuracy_score(Y_true, Y_pred))  # 0 to 1
 
     print("mean per-class accuracy")
     cmatrix = confusion_matrix(Y_true, Y_pred)
     # check if correct, doesnt work well when nr of pred classes is higher than nr of true classes:
-    print(cmatrix.diagonal()/cmatrix.sum(axis=1)/5)
+    print(cmatrix.diagonal() / cmatrix.sum(axis=1) / 5)
 
     print("Confusion matrix:")
     print(cmatrix)
+
 
 def learningcurve(X, Y, model):
     Xv = []
     Yv = []
     for i in range(9):
-        Xt, Yt, Xe, Ye = training_set(X, Y, ((i+1)/10))
+        Xt, Yt, Xe, Ye = training_set(X, Y, ((i + 1) / 10))
         if model == 'svm':
             Y_svm_pred = SVM_classification(Xt, Yt, Xe)
-            Xv.append((i+1)/10)
+            Xv.append((i + 1) / 10)
             Yv.append(accuracy_score(Y_svm_pred, Ye))
             plt.title('Learning Curve using SVM')
         if model == 'rf':
             Y_rf_pred = RF_classification(Xt, Yt, Xe)
-            Xv.append((i+1)/10)
+            Xv.append((i + 1) / 10)
             Yv.append(accuracy_score(Y_rf_pred, Ye))
             plt.title('Learning Curve using RF')
     plt.plot(Xv, Yv)
@@ -580,7 +600,53 @@ def learningcurve(X, Y, model):
     plt.ylabel('Overall Accuracy')
     plt.show()
 
-if __name__=='__main__':
+
+def random_feature_test(X, Y, set_p, n):
+    feature_names = ['height', 'root density', 'linearity', 'planarity', 'sphericity', 'omnivariance', 'anisotropy',
+                     'eigenentropy', 'sum of the eigen-features', 'change of curvature']
+    iters = []
+    for i in range(X.shape[1]):
+        iters.append(i)
+    combins = list(itertools.combinations(iters, n))
+
+    random_sets = []
+    count = 0
+    while count < 4:
+        random_index = random.randrange(0, len(combins))
+        if combins[random_index] != tuple(set_p):
+            random_sets.append(random_index)
+            count = count + 1
+
+    pbar = tqdm(total=5)
+    for i in range(5):
+        if i != 4:
+            setx = list(combins[random_sets[i]])
+            X_ = X[:, setx]
+            Xt, Yt, Xe, Ye = training_set(X_, Y, 0.6)
+            Y_rf_pred = RF_classification(Xt, Yt, Xe)
+            if n == 3:
+                print("evaluation for combination: {0}-{1}-{2}".format(feature_names[setx[0]], feature_names[setx[1]],
+                                                                       feature_names[setx[2]]))
+            else:
+                print("evaluation for combination: {0}".format(setx))
+            Evaluation(Y_rf_pred, Ye)
+            pbar.update(1)
+        else:
+            if n == 3:
+                X_ = X[:, set_p]
+                Xt, Yt, Xe, Ye = training_set(X_, Y, 0.6)
+                Y_rf_pred = RF_classification(Xt, Yt, Xe)
+                print("evaluation for combination: {0}-{1}-{2}".format(feature_names[set_p[0]], feature_names[set_p[1]],
+                                                                       feature_names[set_p[2]]))
+                Evaluation(Y_rf_pred, Ye)
+                pbar.update(1)
+            else:
+                pbar.update(1)
+                continue
+    pbar.close()
+
+
+if __name__ == '__main__':
     # specify the data folder
     """"Here you need to specify your own path"""
     path = 'data/pointclouds'
@@ -600,9 +666,9 @@ if __name__=='__main__':
 
     # SVM classification
     print('Get training set')
-    Xt, Yt, Xe, Ye = training_set(X, Y, 0.6) # beware this is random
+    Xt, Yt, Xe, Ye = training_set(X, Y, 0.6)  # beware this is random
     # Xt&Yt are training, Xe&Ye are evaluating/test set
-    
+
     # SVM classification
     print('Start SVM classification')
     # SVM_parameter_test(X, Y) # not sure if we should use training or whole set?
